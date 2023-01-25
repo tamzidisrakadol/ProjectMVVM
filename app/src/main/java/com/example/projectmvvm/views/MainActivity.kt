@@ -3,9 +3,11 @@ package com.example.projectmvvm.views
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.get
+import com.example.projectmvvm.QuoteApplication
 import com.example.projectmvvm.R
 import com.example.projectmvvm.api.QuoteService
 import com.example.projectmvvm.api.RetrofitHelper
@@ -21,18 +23,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //create quoteService for repository
-        val quoteService = RetrofitHelper.getInstance().create(QuoteService::class.java)
-
-        //create repository for viewModel
-        val repository = QuoteRepo(quoteService)
+        //create an application class
+        val repo = (application as QuoteApplication).repository
 
         //init viewModel
-        quoteViewModel = ViewModelProvider(this,QuoteViewModelFactory(repository)).get(QuoteViewModel::class.java)
+        quoteViewModel = ViewModelProvider(this,QuoteViewModelFactory(repo)).get(QuoteViewModel::class.java)
 
         //observe quote form QuoteViewModel
         quoteViewModel.quote.observe(this, Observer {
-            Log.d(TAG,it.results.toString())
+            Toast.makeText(this, "size"+it.results.size, Toast.LENGTH_SHORT).show()
         })
     }
 }
