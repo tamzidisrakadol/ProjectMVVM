@@ -38,8 +38,17 @@ class QuoteRepo(private val quoteService: QuoteService,private val quoteDatabase
             val quoteList = Quote(1,1,1,offlineQuotes,1,1)  //dummy data
             quoteLiveData.postValue(quoteList)
         }
-
-
-
     }
+
+
+
+    //work-Manager
+    suspend fun getQuotesInBackground(){
+        var randomNumber = (Math.random()*10).toInt()
+        var result = quoteService.getQuotes(randomNumber)
+        if (result?.body()!=null){
+            quoteDatabase.quoteDao().insertQuote(result.body()!!.results)
+        }
+    }
+
 }
