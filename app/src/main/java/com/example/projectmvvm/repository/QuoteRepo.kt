@@ -11,11 +11,11 @@ import com.example.projectmvvm.utils.NetworkClass
 class QuoteRepo(private val quoteService: QuoteService,private val quoteDatabase: QuoteDatabase,private val applicationContext:Context) {
 
     //create an quoteLiveData to observe data live
-    private val quoteLiveData = MutableLiveData<Quote>()
+    private val quoteLiveData = MutableLiveData<Response<Quote>>()
 
 
     //encapsulate with liveData for unchangeable
-    val quotes: LiveData<Quote>
+    val quotes: LiveData<Response<Quote>>
         get() = quoteLiveData
 
 
@@ -26,17 +26,23 @@ class QuoteRepo(private val quoteService: QuoteService,private val quoteDatabase
 
         if (NetworkClass.isInternetAvailable(applicationContext)){
 
-            val result = quoteService.getQuotes(page)
-            if (result?.body() != null) {    //result!=null && result.body()!=null
-                quoteDatabase.quoteDao().insertQuote(result.body()!!.results)
-                quoteLiveData.postValue(result.body())
+            try {
+                val result = quoteService.getQuotes(page)
+                if (result?.body() != null) {    //result!=null && result.body()!=null
+                    quoteDatabase.quoteDao().insertQuote(result.body()!!.results)
+                    quoteLiveData.postValue(Response.Success(result.body()))
+                }else{
+                    quoteLiveData.postValue(Response.Error("API ERROR"))
+                }
+            }catch (e:Exception){
+                quoteLiveData.postValue(Response.Error(e.message.toString()))
             }
 
         }else{
 
             val offlineQuotes = quoteDatabase.quoteDao().getQuotes()
             val quoteList = Quote(1,1,1,offlineQuotes,1,1)  //dummy data
-            quoteLiveData.postValue(quoteList)
+            quoteLiveData.postValue(Response.Success(quoteList))
         }
     }
 

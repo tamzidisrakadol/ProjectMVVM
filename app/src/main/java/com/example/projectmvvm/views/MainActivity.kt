@@ -12,6 +12,7 @@ import com.example.projectmvvm.R
 import com.example.projectmvvm.api.QuoteService
 import com.example.projectmvvm.api.RetrofitHelper
 import com.example.projectmvvm.repository.QuoteRepo
+import com.example.projectmvvm.repository.Response
 import com.example.projectmvvm.viewModel.QuoteViewModel
 import com.example.projectmvvm.viewModel.QuoteViewModelFactory
 import retrofit2.Retrofit
@@ -31,7 +32,17 @@ class MainActivity : AppCompatActivity() {
 
         //observe quote form QuoteViewModel
         quoteViewModel.quote.observe(this, Observer {
-            Toast.makeText(this, "size"+it.results.size, Toast.LENGTH_SHORT).show()
+           when(it){
+               is Response.Loading->{}
+               is Response.Success->{
+                  it.data?.let {
+                      Toast.makeText(this, it.results.size.toString(), Toast.LENGTH_SHORT).show()
+                  }
+               }
+               is Response.Error->{
+                   Toast.makeText(this, "Some Error Occurred", Toast.LENGTH_SHORT).show()
+               }
+           }
         })
     }
 }
